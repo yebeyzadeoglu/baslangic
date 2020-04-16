@@ -1,0 +1,77 @@
+import os
+import xml.etree.ElementTree as ET
+import shutil
+import re
+
+
+"""Burada python a istediğim verilerle otomatik dosya açtırdım bunu os.mkdir(dizin) modülü ile yaptım.
+Evrakın geldiği yer bilgisindeki sadece ismi alarak bu isimli dosyalar açtırdım. Evrakın geldiği yer bilgisi vb. örnekler için kullanılabilir.
+"""
+
+
+def dosyaici(dizin):
+    baslangıc = os.getcwd()
+    dosyalar = []
+    os.chdir(dizin)
+
+    for öge in os.listdir(os.curdir):
+        if öge.endswith(".xml"):
+            dosyalar.append(öge)
+    return dosyalar
+
+
+ilgilidosya = dosyaici("C:\\Users\\BEYZADEOGLU\\Desktop\\envision(tretuar)")
+hedefdosya = ""
+liste = ""
+yil = ""
+q = ""
+
+for xmllist in ilgilidosya:
+    object = ET.parse("C:\\Users\\BEYZADEOGLU\\Desktop\\envision(tretuar)\\" + xmllist)
+
+    source = object.getroot()
+
+    for xml in source.findall("document_meta"):
+        for meta in xml:
+            if meta.get("key") == "document_subject" and (re.search('tretu', meta.get("value"), re.IGNORECASE)):
+                print(xmllist)
+                for a in source.findall("document_from_to"):
+                    for b in a:
+                        if b.get("key") == "from":
+                            liste = (b.get("value"))
+                            q = (liste.split("|"))
+                            break
+                        if b.get("key") == "to":
+                            liste = (b.get("value"))
+                            q = (liste.split("|"))
+                for c in source.findall("document_meta"):
+                    for d in c:
+                        if d.get("key") == "organization_date":
+                            yil = d.get("value")
+                            w = yil.split(" ")
+                            x = w[0]
+                            t = x.split("/")
+                            
+                for i in source.findall("document_custom_fields"):
+                    for g in i:
+                        if g.get("key") == "cf__1141" and "[@value_1141]" not in g.get("value"):
+                            ada = g.get("value")
+                        elif g.get("key") == "cf__1141" and g.get("value") == "[@value_1141]":
+                            ada = ""
+                        if g.get("key") == "cf__1143" and "[@value_1143]" not in g.get("value"):
+                            parsel = g.get("value")
+                        elif g.get("key") == "cf__1143" and g.get("value") == "[@value_1143]":
+                            parsel = ""
+
+
+                        
+        if os.path.exists("C:\\Users\\BEYZADEOGLU\\Desktop\\envision(tretuar)\\" + q[3] + "(" + t[2] + ")" + "(" + ada + "-" + parsel + ")") == True:
+            hedefdosya = ("C:\\Users\\BEYZADEOGLU\\Desktop\\envision(tretuar)\\" + q[3] + "(" + t[2] + ")" + "(" + ada + "-" + parsel + ")")
+            continue
+        else:
+            hedefdosya = ("C:\\Users\\BEYZADEOGLU\\Desktop\\envision(tretuar)\\" + q[3] + "(" + t[2] + ")" + "(" + ada + "-" + parsel + ")");
+            os.mkdir(hedefdosya)
+
+    pdffile = xmllist[: -3].strip() + "pdf"
+    shutil.move(pdffile, hedefdosya)
+    shutil.move(xmllist, hedefdosya)
